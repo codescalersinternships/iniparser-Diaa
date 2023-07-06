@@ -3,7 +3,9 @@ package main
 import (
 	"strings"
 	reg "regexp"
+	"errors"
 	"os"
+	"fmt"
 )
 
 
@@ -12,13 +14,16 @@ func main(){
 		iniConfigs: make(map[string]map[string]string),
 	}
 
-	c.LoadFromString(" # Hi\n[Simple Values]\nkey=value\nspaces in keys=allowed\nspaces in values=allowed as well\n[Complex Values]\nspaces around the delimiter = obviously\n")
+	// fmt.Println(c.LoadFromString(" # Hi\n[Simple Values]\nkey=value\nspaces in keys=allowed\nspaces in values=allowed as well\n[Complex Values]\nspaces around the delimiter = obviously\n"))
 
-	// config.GetSectionNames()
-	// config.LoadFromFile("/tmp/dat")
+	fmt.Println(c.LoadFromFile("config.ini"))
+	fmt.Println(c.GetSectionNames())
+
+	// what if the section or the key doesn't exist
+	fmt.Println(c.Get("diaa","ahmed"))
 
 	c.Set("section","key2","value2")
-	c.SaveToFile()
+	// c.SaveToFile()
 
 
 }
@@ -29,13 +34,19 @@ func main(){
 type Methods interface {
 	LoadFromString(configs string)
 	LoadFromFile(path string)
+	GetSectionNames()
+	GetSections()
+	Get(section_name, key string)
+	Set(section_name, key, value string)
+	SaveToFile()
+	ToString()
 }
 
 type Config struct{
 	iniConfigs map[string]map[string]string
 }
 
-func (config* Config) LoadFromString(configs string){
+func (config* Config) LoadFromString(configs string) error{
 	lines := strings.Split(configs,"\n")
 	var lastSection string=""
 
@@ -48,8 +59,11 @@ func (config* Config) LoadFromString(configs string){
 			continue
 		}
 
-		// it will panic the function if any error happens
-		regex := reg.MustCompile(`\[[^\[\]]*\]`)
+		regex, err := reg.Compile(`\[[^\[\]]*\]`)
+
+		if err!= nil{
+			return err
+		}
 
 		section := regex.FindStringSubmatch(line)
 
@@ -68,23 +82,29 @@ func (config* Config) LoadFromString(configs string){
 			key,value :=keyAndValue[0],keyAndValue[1]
 
 			config.iniConfigs[lastSection][key]=value
+		}else{
+			return errors.New("Not Valid Syntax")
 		}
 	}
+	return nil
 }
 
 
 
-func check(err error){
-	if err!=nil{
-		panic(err)
-	}
-}
 
-func (config * Config) LoadFromFile(path string){
+
+func (config * Config) LoadFromFile(path string) error{
 	data, err := os.ReadFile(path)
-	check(err)
+	if err!=nil{
+		return err
+	}
 
-	config.LoadFromString(string(data))
+	err = config.LoadFromString(string(data))
+	if err!=nil{
+		return err
+	}
+
+	return nil
 }
 
 
@@ -129,13 +149,17 @@ func (config * Config) ToString() string {
 }
 
 
-func (config * Config) SaveToFile() {
+func (config * Config) SaveToFile() error{
 
 	configString := config.ToString()
 	stringBytes := []byte(configString)
 
 	// 0644 is an octal code for access (admin: read and write, other users :read)
 	err := os.WriteFile("config.ini",stringBytes, 0644)
-	check(err)
+	if err!=nil{
+		return err
+	}
+
+	return nil
 }
 
