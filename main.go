@@ -29,19 +29,6 @@ func main(){
 }
 
 
-
-
-type Methods interface {
-	LoadFromString(configs string)
-	LoadFromFile(path string)
-	GetSectionNames()
-	GetSections()
-	Get(section_name, key string)
-	Set(section_name, key, value string)
-	SaveToFile()
-	ToString()
-}
-
 type Config struct{
 	iniConfigs map[string]map[string]string
 }
@@ -77,19 +64,22 @@ func (config* Config) LoadFromString(configs string) error{
 			config.iniConfigs[lastSection]=make(map[string]string)
 
 		} else if strings.Contains(line,"=")&& lastSection!=""{
+			
 			// key and value line
 			keyAndValue :=strings.Split(line,"=")
 			key,value :=keyAndValue[0],keyAndValue[1]
 
 			config.iniConfigs[lastSection][key]=value
-		}else{
+		} else {
 			return errors.New("Not Valid Syntax")
 		}
 	}
 	return nil
 }
 
-
+func (config * Config) AddSection(){
+	
+}
 
 
 
