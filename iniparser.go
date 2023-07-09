@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+
 // exported variable so it should start with uppercase
 var ErrInvalidFormat = errors.New("not valid format in line ")
 
@@ -89,7 +90,7 @@ func (p *Parser) LoadFromFile(path string) error {
 
 func (p *Parser) GetSectionNames() []string {
 	sections := make([]string, 0, len(p.sections))
-	for section := range p.sections {
+	for section:= range p.sections {
 		sections = append(sections, section)
 	}
 	return sections
