@@ -125,10 +125,6 @@ func (config *Config) SaveToFile(path string) error {
 	stringBytes := []byte(configString)
 
 	// 0644 is an octal code for access (admin: read and write, other users :read)
-	err := os.WriteFile(path, stringBytes, 0644)
-	if err != nil {
-		return err
-	}
+	return os.WriteFile(path, stringBytes, 0644)
 
-	return nil
 }
