@@ -11,10 +11,6 @@ type Dictionary map[string]map[string]string
 
 var ErrNotValidSyntax = errors.New("Not Valid Syntax")
 
-func main() {
-	c := Config{}
-	c.InitializeMap()
-}
 
 type Config struct {
 	iniConfigs Dictionary
