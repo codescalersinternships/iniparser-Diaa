@@ -12,20 +12,8 @@ type Dictionary map[string]map[string]string
 var ErrNotValidSyntax = errors.New("Not Valid Syntax")
 
 func main() {
-	// c := Config{}
-	// c.InitializeMap()
-
-	// c.LoadFromString("[ini_Valid_Syntax]")
-
-	// // fmt.Println(c.LoadFromFile("config.ini"))
-	// // fmt.Println(c.GetSectionNames())
-
-	// // // what if the section or the key doesn't exist
-	// // fmt.Println(c.Get("diaa","ahmed"))
-
-	// // c.Set("section","key2","value2")
-	// c.SaveToFile("config2.ini")
-
+	c := Config{}
+	c.InitializeMap()
 }
 
 type Config struct {
