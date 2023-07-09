@@ -1,113 +1,111 @@
 package main
 
 import (
-	"strings"
-	reg "regexp"
 	"errors"
 	"os"
-	"fmt"
+	reg "regexp"
+	"strings"
 )
 
+type Dictionary map[string]map[string]string
 
-func main(){
-	c := Config{
-		iniConfigs: make(map[string]map[string]string),
-	}
+var ErrNotValidSyntax = errors.New("Not Valid Syntax")
 
-	// fmt.Println(c.LoadFromString(" # Hi\n[Simple Values]\nkey=value\nspaces in keys=allowed\nspaces in values=allowed as well\n[Complex Values]\nspaces around the delimiter = obviously\n"))
+func main() {
+	// c := Config{}
+	// c.InitializeMap()
 
-	fmt.Println(c.LoadFromFile("config.ini"))
-	fmt.Println(c.GetSectionNames())
+	// c.LoadFromString("[ini_Valid_Syntax]")
 
-	// what if the section or the key doesn't exist
-	fmt.Println(c.Get("diaa","ahmed"))
+	// // fmt.Println(c.LoadFromFile("config.ini"))
+	// // fmt.Println(c.GetSectionNames())
 
-	c.Set("section","key2","value2")
-	// c.SaveToFile()
+	// // // what if the section or the key doesn't exist
+	// // fmt.Println(c.Get("diaa","ahmed"))
 
+	// // c.Set("section","key2","value2")
+	// c.SaveToFile("config2.ini")
 
 }
 
-
-type Config struct{
-	iniConfigs map[string]map[string]string
+type Config struct {
+	iniConfigs Dictionary
 }
 
-func (config* Config) LoadFromString(configs string) error{
-	lines := strings.Split(configs,"\n")
-	var lastSection string=""
+func (c *Config) InitializeMap() {
+	c.iniConfigs = make(Dictionary)
+}
 
-	for _,line := range lines {
-		
-		line = strings.Trim(line," ")
+func (config *Config) LoadFromString(configs string) error {
+	lines := strings.Split(configs, "\n")
+	var lastSection string = ""
+
+	for _, line := range lines {
+
+		line = strings.Trim(line, " ")
 
 		// comment
-		if  len(line)==0 || string(line[0])=="#" {
+		if len(line) == 0 || string(line[0]) == "#" {
 			continue
 		}
 
 		regex, err := reg.Compile(`\[[^\[\]]*\]`)
 
-		if err!= nil{
+		if err != nil {
 			return err
 		}
 
 		section := regex.FindStringSubmatch(line)
 
 		// new section
-		if(len(section)>0){
+		if len(section) > 0 {
 
 			// getting section name
-			lastSection = strings.ReplaceAll(section[0],"[","")
-			lastSection=strings.ReplaceAll(lastSection,"]","")
-			
-			config.iniConfigs[lastSection]=make(map[string]string)
+			lastSection = strings.ReplaceAll(section[0], "[", "")
+			lastSection = strings.ReplaceAll(lastSection, "]", "")
 
-		} else if strings.Contains(line,"=")&& lastSection!=""{
-			
+			lastSection = strings.Trim(lastSection, " ")
+
+			config.iniConfigs[lastSection] = make(map[string]string)
+
+		} else if strings.Contains(line, "=") && lastSection != "" {
+
 			// key and value line
-			keyAndValue :=strings.Split(line,"=")
-			key,value :=keyAndValue[0],keyAndValue[1]
+			keyAndValue := strings.Split(line, "=")
+			key, value := keyAndValue[0], keyAndValue[1]
+			key, value = strings.Trim(key, " "), strings.Trim(value, " ")
 
-			config.iniConfigs[lastSection][key]=value
+			config.iniConfigs[lastSection][key] = value
 		} else {
-			return errors.New("Not Valid Syntax")
+			return ErrNotValidSyntax
 		}
 	}
 	return nil
 }
 
-func (config * Config) AddSection(){
-	
-}
-
-
-
-func (config * Config) LoadFromFile(path string) error{
+func (config *Config) LoadFromFile(path string) error {
 	data, err := os.ReadFile(path)
-	if err!=nil{
+
+	if err != nil {
 		return err
 	}
 
 	err = config.LoadFromString(string(data))
-	if err!=nil{
+
+	if err != nil {
 		return err
 	}
-
 	return nil
 }
-
-
-func (config * Config) GetSectionNames ()[] string{
-
-	sections :=make([]string,0, len(config.iniConfigs))
-	for section,_:=range config.iniConfigs {
-		sections = append(sections,section)
+func (config *Config) GetSectionNames() [] string {
+	sections := make([]string, 0, len(config.iniConfigs))
+	for section, _ := range config.iniConfigs {
+		sections = append(sections, section)
 	}
 	return sections
 }
 
-func (config * Config) GetSections () map[string]map[string]string {
+func (config *Config) GetSections() map[string]map[string]string {
 	return config.iniConfigs
 }
 
@@ -116,40 +114,37 @@ func (config *Config) Get(section_name, key string) string {
 }
 
 func (config *Config) Set(section_name, key, value string) {
-	
+
 	// checking if the section doesn't exist (new section)
-	if config.iniConfigs[section_name]==nil{
+	if config.iniConfigs[section_name] == nil {
 		config.iniConfigs[section_name] = make(map[string]string)
 	}
-	config.iniConfigs[section_name][key]=value
+	config.iniConfigs[section_name][key] = value
 }
 
+func (config *Config) ToString() string {
 
-func (config * Config) ToString() string {
-
-	configText :=""
-	for section,configs:=range config.iniConfigs {
-		configText+= "["+section+"]\n"
-		for key,value := range configs {
-			configText+=key +"=" + value +"\n"
+	configText := ""
+	for section, configs := range config.iniConfigs {
+		configText += "[" + section + "]\n"
+		for key, value := range configs {
+			configText += key + "=" + value + "\n"
 		}
 	}
 
 	return configText
 }
 
-
-func (config * Config) SaveToFile() error{
+func (config *Config) SaveToFile(path string) error {
 
 	configString := config.ToString()
 	stringBytes := []byte(configString)
 
 	// 0644 is an octal code for access (admin: read and write, other users :read)
-	err := os.WriteFile("config.ini",stringBytes, 0644)
-	if err!=nil{
+	err := os.WriteFile(path, stringBytes, 0644)
+	if err != nil {
 		return err
 	}
 
 	return nil
 }
-
