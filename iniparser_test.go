@@ -2,11 +2,11 @@ package iniparser
 
 import (
 	"errors"
+	"os"
 	"reflect"
 	"sort"
 	"strings"
 	"testing"
-	"os"
 )
 
 // no underscore in the name
@@ -17,6 +17,9 @@ spaces in keys=allowed
 spaces in values=allowed as well
 [Complex Values]
 spaces around the delimiter=obviously
+key=
+[new[section]]
+new key = new value
 `
 
 var iniInvalidFormat = []string{
@@ -25,7 +28,11 @@ var iniInvalidFormat = []string{
 	`Hi
 [Simple Values]
 key-value`,
-	`[Simple Values][section]`,
+	`[Simple Values][section`,
+	`[Simple]
+	=value`,
+	`[Simple]
+	=`,
 }
 
 func TestLoadFromString(t *testing.T) {
@@ -48,7 +55,7 @@ func TestLoadFromString(t *testing.T) {
 			err := p.LoadFromString(text)
 
 			if !errors.Is(err, ErrInvalidFormat) {
-				t.Errorf("got %q want %q with text %q", err, ErrInvalidFormat, iniInvalidFormat)
+				t.Errorf("got %q want %q with text %q", err, ErrInvalidFormat, text)
 			}
 		}
 
@@ -118,12 +125,11 @@ func TestGetSectionNames(t *testing.T) {
 		}
 
 		gotSections := p.GetSectionNames()
-		wantedSections := []string{"Simple Values", "Complex Values"}
+		wantedSections := []string{"Simple Values", "Complex Values", "new[section]"}
 
 		// we don't care about the order
 		sort.Strings(gotSections)
 		sort.Strings(wantedSections)
-
 		if !reflect.DeepEqual(gotSections, wantedSections) {
 			t.Errorf("actual %v does not match expected %v", gotSections, wantedSections)
 		}
@@ -161,6 +167,9 @@ func TestGetSections(t *testing.T) {
 			},
 			"Complex Values": Section{
 				"spaces around the delimiter": "obviously",
+				"key":                         "",
+			}, "new[section]": Section{
+				"new key": "new value",
 			},
 		}
 
@@ -271,7 +280,7 @@ func TestString(t *testing.T) {
 	p := NewParser()
 
 	t.Parallel()
-	
+
 	t.Run("Testing String Function", func(t *testing.T) {
 		err := p.LoadFromString(iniValidFormat)
 

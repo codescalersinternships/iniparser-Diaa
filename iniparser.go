@@ -1,19 +1,21 @@
 package iniparser
 
 import (
+	"bufio"
 	"github.com/pkg/errors"
 	"os"
 	"path/filepath"
-	reg "regexp"
+	"io"
+	"fmt"
 	"strings"
 )
 
 // exported variable so it should start with uppercase
 var (
-	ErrInvalidFormat    = errors.New("not valid format in line ")
-	ErrInvalidExtension = errors.New("File is not in the INI format or does not have a .ini extension")
+	ErrInvalidFormat    = errors.New("invalid format ")
+	ErrInvalidExtension = errors.New("file is not in the ini format or does not have a .ini extension")
 	ErrKeyNotExist      = errors.New("key doesn't exist")
-	ErrSectionNotExist  = errors.New("Section doesn't exist")
+	ErrSectionNotExist  = errors.New("section doesn't exist")
 )
 
 type Section map[string]string
@@ -24,34 +26,63 @@ type Parser struct {
 	sections Ini
 }
 
+// NewParser returns new Parser
 func NewParser() Parser {
 	return Parser{sections: make(Ini)}
 }
 
 func (p *Parser) LoadFromString(content string) error {
-	lines := strings.Split(content, "\n")
-	var currentSection string = ""
+	return p.LoadFromReader(bufio.NewReader(strings.NewReader(content)))
+}
 
-	for idx, line := range lines {
+func (p *Parser) LoadFromFile(path string) error {
+
+	fileExt := filepath.Ext(path)
+
+	if fileExt != ".ini" {
+		return ErrInvalidExtension
+	}
+
+	file, err := os.Open(path)
+
+	if err != nil {
+		return err
+	}
+
+	defer file.Close()
+
+	return p.LoadFromReader(bufio.NewReader(file))
+}
+
+func (p *Parser) LoadFromReader(reader io.Reader) error {
+	var currentSection string = ""
+	scanner := bufio.NewScanner(reader)
+	idx := 0
+	for scanner.Scan() {
+		idx++
+		line := scanner.Text()
 
 		line = strings.TrimSpace(line)
-
 		// comment
 		if len(line) == 0 || string(line[0]) == "#" {
 			continue
 		}
 
 		// checking if the line in that format [section] and just exist one time in the line
-		regex := reg.MustCompile(`^\[[a-zA-Z\s]+\]$`)
-
-		isMatched := regex.MatchString(line)
 
 		// new section
-		if isMatched {
+		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
 
-			currentSection = line[1 : len(line)-1]
+			sectionName := line[1 : len(line)-1]
+			sectionName = strings.TrimSpace(sectionName)
 
-			p.sections[currentSection] = make(map[string]string)
+			if len(sectionName) == 0 {
+				return errors.Wrapf(ErrInvalidFormat, "invalid section at line %d", idx)
+			}
+
+			currentSection = sectionName
+
+			p.sections[currentSection] = make(Section)
 			continue
 
 		}
@@ -63,29 +94,16 @@ func (p *Parser) LoadFromString(content string) error {
 			key, value := keyAndValue[0], keyAndValue[1]
 			key, value = strings.TrimSpace(key), strings.TrimSpace(value)
 
+			if len(key) == 0 {
+				return errors.Wrapf(ErrInvalidFormat, "invalid key at line %d", idx)
+			}
+
 			p.sections[currentSection][key] = value
 		} else {
-			return errors.Wrapf(ErrInvalidFormat, "%d", idx)
+			return errors.Wrapf(ErrInvalidFormat, "invalid format at line %d", idx)
 		}
 	}
-	return nil
-}
-
-func (p *Parser) LoadFromFile(path string) error {
-
-	fileExt := filepath.Ext(path)
-
-	if fileExt != ".ini" {
-		return ErrInvalidExtension
-	}
-
-	data, err := os.ReadFile(path)
-
-	if err != nil {
-		return err
-	}
-
-	return p.LoadFromString(string(data))
+	return scanner.Err()
 }
 
 func (p *Parser) GetSectionNames() []string {
@@ -118,7 +136,7 @@ func (p *Parser) Get(section_name, key string) (string, error) {
 func (p *Parser) Set(section_name, key, value string) {
 
 	if p.sections[section_name] == nil {
-		p.sections[section_name] = make(map[string]string)
+		p.sections[section_name] = make(Section)
 	}
 	p.sections[section_name][key] = value
 }
@@ -127,9 +145,9 @@ func (p *Parser) String() string {
 
 	configText := ""
 	for section, configs := range p.sections {
-		configText += "[" + section + "]\n"
+		configText += fmt.Sprintf("[%s]\n", section)
 		for key, value := range configs {
-			configText += key + "=" + value + "\n"
+			configText += fmt.Sprintf("%s=%s\n", key, value)
 		}
 	}
 
