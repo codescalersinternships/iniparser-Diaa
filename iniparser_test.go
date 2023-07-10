@@ -9,7 +9,6 @@ import (
 	"testing"
 )
 
-// no underscore in the name
 const iniValidFormat = `
 [Simple Values]
 key=value
