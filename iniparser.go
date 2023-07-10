@@ -10,6 +10,7 @@ import (
 	"strings"
 )
 
+
 var (
 	ErrInvalidFormat    = errors.New("invalid format ")
 	ErrInvalidExtension = errors.New("file is not in the ini format or does not have a .ini extension")
@@ -123,16 +124,16 @@ func (p *Parser) GetSections() Ini {
 }
 
 // Get returns the value of a key in a section.
-func (p *Parser) Get(section_name, key string) (string, error) {
+func (p *Parser) Get(sectionName, key string) (string, error) {
 
 	// Check if section exists
-	_, ok := p.sections[section_name]
+	_, ok := p.sections[sectionName]
 	if !ok {
 		return "", ErrSectionNotExist
 	}
 
 	// Check if key exists
-	value, ok := p.sections[section_name][key]
+	value, ok := p.sections[sectionName][key]
 	if !ok {
 		return "", ErrKeyNotExist
 	}
@@ -141,15 +142,15 @@ func (p *Parser) Get(section_name, key string) (string, error) {
 }
 
 // Set sets the value of a key in a section.
-func (p *Parser) Set(section_name, key, value string) {
+func (p *Parser) Set(sectionName, key, value string) {
 
 	// Create section if it doesn't exist
-	if p.sections[section_name] == nil {
-		p.sections[section_name] = make(Section)
+	if p.sections[sectionName] == nil {
+		p.sections[sectionName] = make(Section)
 	}
 
 	// Set key-value pair
-	p.sections[section_name][key] = value
+	p.sections[sectionName][key] = value
 }
 
 // String returns the INI data in string format.

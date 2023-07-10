@@ -39,4 +39,4 @@ jobs:
       run: go get golang.org/x/lint/golint@v0.0.0-20181217174547-8f45f776aaf1
 
     - name: Run Linter
-      run: golint
+      run: golint ./...
