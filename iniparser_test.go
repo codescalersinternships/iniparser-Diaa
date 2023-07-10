@@ -173,25 +173,13 @@ func TestGetSections(t *testing.T) {
 			},
 		}
 
-		for section, gotSectionData := range got {
-			wantedSectionData, ok := wanted[section]
-			if !ok || !assertSectionData(gotSectionData, wantedSectionData) {
-				t.Errorf("actual map %v does not match expected map %v", got, wanted)
-			}
+		if !reflect.DeepEqual(got,wanted){
+			t.Errorf("actual map %v does not match expected map %v", got, wanted)
 
 		}
 	})
 }
 
-func assertSectionData(gotSection, wantedSection Section) bool {
-	for key, value := range gotSection {
-		wantedValue, ok := wantedSection[key]
-		if !ok || value != wantedValue {
-			return false
-		}
-	}
-	return true
-}
 
 func TestGet(t *testing.T) {
 	p := NewParser()
