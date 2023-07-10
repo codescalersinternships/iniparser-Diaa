@@ -9,6 +9,7 @@ import (
 	"testing"
 )
 
+
 const iniValidFormat = `
 [Simple Values]
 key=value
