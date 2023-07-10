@@ -9,11 +9,12 @@ import (
 )
 
 // exported variable so it should start with uppercase
-var ErrInvalidFormat = errors.New("not valid format in line ")
-
-var ErrInvalidExtension = errors.New("File is not in the INI format or does not have a .ini extension")
-
-var ErrKeyNotExist = errors.New("key not exist")
+var (
+	ErrInvalidFormat    = errors.New("not valid format in line ")
+	ErrInvalidExtension = errors.New("File is not in the INI format or does not have a .ini extension")
+	ErrKeyNotExist      = errors.New("key doesn't exist")
+	ErrSectionNotExist  = errors.New("Section doesn't exist")
+)
 
 type Section map[string]string
 
@@ -101,11 +102,17 @@ func (p *Parser) GetSections() Ini {
 
 func (p *Parser) Get(section_name, key string) (string, error) {
 
-	value, ok := p.sections[section_name][key]
-	if ok {
-		return value, nil
+	_, ok := p.sections[section_name]
+	if !ok {
+		return "", ErrSectionNotExist
 	}
-	return "", ErrKeyNotExist
+
+	value, ok := p.sections[section_name][key]
+	if !ok {
+		return "", ErrKeyNotExist
+	}
+
+	return value, nil
 }
 
 func (p *Parser) Set(section_name, key, value string) {

@@ -189,23 +189,23 @@ func TestGet(t *testing.T) {
 
 	t.Parallel()
 
-	t.Run("Get value from empty map", func(t *testing.T) {
+	t.Run("Get value from not exist section", func(t *testing.T) {
 
-		_, err := p.Get("Simple Values", "key")
+		_, err := p.Get("Not Exist", "key")
 
-		if err != ErrKeyNotExist {
+		if err != ErrSectionNotExist {
 			t.Errorf("want %q but got %q", ErrKeyNotExist, err)
 		}
 	})
 
-	t.Run("Get value from empty section", func(t *testing.T) {
+	t.Run("Get value from Key not exist", func(t *testing.T) {
 
 		err := p.LoadFromString(iniValidFormat)
 		if err != nil {
 			t.Errorf("error in loading the string, Error message: %q", err.Error())
 		}
 
-		_, err = p.Get("Not Existing Section", "key")
+		_, err = p.Get("Simple Values", "not exist")
 
 		if !errors.Is(ErrKeyNotExist, err) {
 			t.Errorf("want %q but got %q", ErrKeyNotExist, err)
