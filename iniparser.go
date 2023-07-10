@@ -8,7 +8,6 @@ import (
 	"strings"
 )
 
-
 // exported variable so it should start with uppercase
 var ErrInvalidFormat = errors.New("not valid format in line ")
 
@@ -24,8 +23,8 @@ type Parser struct {
 	sections Ini
 }
 
-func NewINI() Ini {
-	return make(Ini)
+func NewParser() Parser {
+	return Parser{sections: make(Ini)}
 }
 
 func (p *Parser) LoadFromString(content string) error {
@@ -90,7 +89,7 @@ func (p *Parser) LoadFromFile(path string) error {
 
 func (p *Parser) GetSectionNames() []string {
 	sections := make([]string, 0, len(p.sections))
-	for section:= range p.sections {
+	for section := range p.sections {
 		sections = append(sections, section)
 	}
 	return sections

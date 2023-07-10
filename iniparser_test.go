@@ -29,8 +29,7 @@ key-value`,
 }
 
 func TestLoadFromString(t *testing.T) {
-	p := Parser{}
-	p.sections = NewINI()
+	p := NewParser()
 
 	t.Parallel()
 
@@ -57,8 +56,7 @@ func TestLoadFromString(t *testing.T) {
 }
 
 func TestLoadFromFile(t *testing.T) {
-	p := Parser{}
-	p.sections = NewINI()
+	p := NewParser()
 
 	t.Parallel()
 
@@ -101,8 +99,7 @@ func TestLoadFromFile(t *testing.T) {
 }
 
 func TestGetSectionNames(t *testing.T) {
-	p := Parser{}
-	p.sections = NewINI()
+	p := NewParser()
 
 	t.Parallel()
 
@@ -134,8 +131,7 @@ func TestGetSectionNames(t *testing.T) {
 }
 
 func TestGetSections(t *testing.T) {
-	p := Parser{}
-	p.sections = NewINI()
+	p := NewParser()
 
 	t.Parallel()
 
@@ -189,8 +185,7 @@ func assertSectionData(gotSection, wantedSection Section) bool {
 }
 
 func TestGet(t *testing.T) {
-	p := Parser{}
-	p.sections = NewINI()
+	p := NewParser()
 
 	t.Parallel()
 
@@ -226,8 +221,7 @@ func TestGet(t *testing.T) {
 }
 
 func TestSet(t *testing.T) {
-	p := Parser{}
-	p.sections = NewINI()
+	p := NewParser()
 
 	t.Run("Set value to map", func(t *testing.T) {
 		p.Set("Simple Values", "key", "new value")
@@ -244,8 +238,7 @@ func assertStrings(t testing.TB, got, want string) {
 }
 
 func TestSaveToFile(t *testing.T) {
-	p := Parser{}
-	p.sections = NewINI()
+	p := NewParser()
 
 	t.Parallel()
 
@@ -275,8 +268,7 @@ func TestSaveToFile(t *testing.T) {
 }
 
 func TestString(t *testing.T) {
-	p := Parser{}
-	p.sections = NewINI()
+	p := NewParser()
 
 	t.Parallel()
 	
