@@ -7,6 +7,8 @@ import (
 	"sort"
 	"strings"
 	"testing"
+	"path/filepath"
+	"fmt"
 )
 
 
@@ -69,15 +71,13 @@ func TestLoadFromFile(t *testing.T) {
 
 	t.Run("Valid File Path", func(t *testing.T) {
 
-		file, err := os.CreateTemp("", "config.ini")
+		file, err := os.CreateTemp("", "config-*.ini")
 		if err != nil {
 			t.Errorf("Error creating temporary file: %q", err)
 		}
 		defer os.Remove(file.Name())
 
-		validFile := "config.ini"
-
-		err = p.LoadFromFile(validFile)
+		err = p.LoadFromFile(file.Name())
 
 		if err != nil {
 			t.Errorf("expected no error but got %q", err.Error())
@@ -245,7 +245,11 @@ func TestSaveToFile(t *testing.T) {
 			t.Errorf("error in loading the string, Error message: %q", err.Error())
 		}
 
-		err = p.SaveToFile("config.ini")
+		tempDir :=t.TempDir()
+
+		filePath := filepath.Join(tempDir,"config.ini")
+
+		err = p.SaveToFile(filePath)
 		if err != nil {
 			t.Errorf("wanted nil got %q", err.Error())
 		}
@@ -283,7 +287,7 @@ func TestString(t *testing.T) {
 		for section, sectionData := range p.GetSections() {
 			sectionNoSpaces := strings.ReplaceAll(section, " ", "")
 
-			if !assertContainsSubString(inputNoSpaces, outNoSpaces, "["+sectionNoSpaces+"]") {
+			if !assertContainsSubString(inputNoSpaces, outNoSpaces, fmt.Sprintf("[%s]",sectionNoSpaces)) {
 				t.Errorf("Expected section [%s] not found in output: %s", sectionNoSpaces, out)
 			}
 
@@ -291,7 +295,7 @@ func TestString(t *testing.T) {
 				keyNoSpaces := strings.ReplaceAll(key, " ", "")
 				valueNoSpaces := strings.ReplaceAll(value, " ", "")
 
-				if !assertContainsSubString(inputNoSpaces, outNoSpaces, keyNoSpaces+"="+valueNoSpaces) {
+				if !assertContainsSubString(inputNoSpaces, outNoSpaces, fmt.Sprintf("%s=%s",keyNoSpaces,valueNoSpaces)) {
 					t.Errorf("Expected section [%s] not found in output: %s", sectionNoSpaces, out)
 				}
 
