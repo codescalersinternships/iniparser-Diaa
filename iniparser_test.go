@@ -22,7 +22,7 @@ key=
 new key = new value
 `
 
-var iniInvalidFormat = []string{
+var iniInvalidFormats = []string{
 	`# Hi
 [Simple Values`,
 	`Hi
@@ -50,7 +50,7 @@ func TestLoadFromString(t *testing.T) {
 
 	t.Run("Invalid INI Syntax", func(t *testing.T) {
 
-		for _, text := range iniInvalidFormat {
+		for _, text := range iniInvalidFormats {
 
 			err := p.LoadFromString(text)
 
