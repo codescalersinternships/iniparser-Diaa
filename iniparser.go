@@ -2,11 +2,11 @@ package iniparser
 
 import (
 	"bufio"
-	"github.com/pkg/errors"
+	"errors"
+	"fmt"
+	"io"
 	"os"
 	"path/filepath"
-	"io"
-	"fmt"
 	"strings"
 )
 
@@ -82,7 +82,7 @@ func (p *Parser) LoadFromReader(reader io.Reader) error {
 			sectionName = strings.TrimSpace(sectionName)
 
 			if len(sectionName) == 0 {
-				return errors.Wrapf(ErrInvalidFormat, "invalid section at line %d", idx)
+				return fmt.Errorf("%w invalid section at line %d", ErrInvalidFormat, idx)
 			}
 
 			// Start new section
@@ -101,17 +101,18 @@ func (p *Parser) LoadFromReader(reader io.Reader) error {
 			key, value = strings.TrimSpace(key), strings.TrimSpace(value)
 
 			if len(key) == 0 {
-				return errors.Wrapf(ErrInvalidFormat, "invalid key at line %d", idx)
+				return fmt.Errorf("%w invalid key at line %d", ErrInvalidFormat, idx)
 			}
 
 			// Add key-value pair to current section
 			p.sections[currentSection][key] = value
 		} else {
-			return errors.Wrapf(ErrInvalidFormat, "invalid format at line %d", idx)
+			return fmt.Errorf("%w invalid format at line %d", ErrInvalidFormat, idx)
 		}
 	}
 	return scanner.Err()
 }
+
 // GetSectionNames returns the names of all sections in the INI data.
 func (p *Parser) GetSectionNames() []string {
 	sections := make([]string, 0, len(p.sections))
@@ -176,7 +177,6 @@ func (p *Parser) SaveToFile(path string) error {
 	// Get INI data as string
 	configString := p.String()
 	stringBytes := []byte(configString)
-
 
 	// 0644 is an octal code for access (Owner: read and write, Members of the file's group and other users : read)
 	return os.WriteFile(path, stringBytes, 0644)
