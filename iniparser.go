@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-
+// The error messages that can be returned by the INI parser.
 var (
 	ErrInvalidFormat    = errors.New("invalid format ")
 	ErrInvalidExtension = errors.New("file is not in the ini format or does not have a .ini extension")
@@ -18,17 +18,20 @@ var (
 	ErrSectionNotExist  = errors.New("section doesn't exist")
 )
 
+// Section is an alias for a map of string key-value pairs representing a section in INI data.
 type Section map[string]string
 
-type Ini map[string]Section
+// IniData is an alias for a map of string keys to Section values representing the entire INI data.
+type IniData map[string]Section
 
+// Parser represents an INI parser Object contains a map of sections representing the INI data.
 type Parser struct {
-	sections Ini
+	sections IniData
 }
 
 // NewParser returns a new Parser object.
 func NewParser() Parser {
-	return Parser{sections: make(Ini)}
+	return Parser{sections: make(IniData)}
 }
 
 // LoadFromString loads INI data from a string.
@@ -119,7 +122,7 @@ func (p *Parser) GetSectionNames() []string {
 }
 
 // GetSections returns the entire INI data as a map of sections to key-value pairs.
-func (p *Parser) GetSections() Ini {
+func (p *Parser) GetSections() IniData {
 	return p.sections
 }
 

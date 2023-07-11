@@ -159,7 +159,7 @@ func TestGetSections(t *testing.T) {
 
 		got := p.GetSections()
 
-		wanted := Ini{
+		wanted := IniData{
 			"Simple Values": Section{
 				"key":              "value",
 				"spaces in keys":   "allowed",
