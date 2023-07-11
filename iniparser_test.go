@@ -35,9 +35,6 @@ key-value`,
 	=`,
 }
 
-
-
-
 func TestLoadFromString(t *testing.T) {
 	p := NewParser()
 
