@@ -36,14 +36,7 @@ jobs:
           go-version: 1.16
 
       - name: Install golint
-        run: go get golang.org/x/lint/golint@v0.0.0-20181217174547-8f45f776aaf1
+        run: go get golang.org/x/lint/golint
 
       - name: Run Linter
         run: golint ./...
-
-      - name: Lint Action
-        uses: marketplace/actions/lint-action@v1
-        with:
-          linter: golint
-          directory: .
-          continue-on-error: false
