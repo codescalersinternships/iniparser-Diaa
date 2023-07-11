@@ -63,3 +63,16 @@ iniparser.ErrInvalidExtension
 iniparser.ErrKeyNotExist
 iniparser.ErrSectionNotExist
 ```
+
+# Format
+### When using the INIParser library, it's important to follow these rules to ensure proper usage.
+#### These rules include:
+
+- Comments just at the beginning of a line: Comments in INI files or strings are only valid when they appear at the beginning of a line and are preceded by a semicolon (;).
+
+- Ensuring trimmed keys, values, and section headers: Leading and trailing spaces are trimmed by the library, and keys, and section headers cannot be empty.
+
+- Using the equals sign (=) as the key-value separator: INI files or strings use the equals sign to denote the assignment of a value to a key.
+
+
+- No global keys: The library assumes that all keys must belong to a section, and global keys are not permitted in INI files or strings.
