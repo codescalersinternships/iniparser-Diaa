@@ -127,7 +127,7 @@ func (p *Parser) LoadFromReader(reader io.Reader) error {
 			p.sections[currentSection][key] = value
 		} else {
 			p.EmptySections()
-			return fmt.Errorf("%w invalid format at line %d", ErrInvalidFormat, idx)
+			return fmt.Errorf("%w at line %d", ErrInvalidFormat, idx)
 		}
 	}
 	return scanner.Err()
