@@ -179,6 +179,10 @@ func (p *Parser) String() string {
 
 // SaveToFile saves the INI data to a file.
 func (p *Parser) SaveToFile(path string) error {
+	fileExt := filepath.Ext(path)
+	if fileExt != ".ini" {
+		return ErrInvalidExtension
+	}
 
 	// Get INI data as string
 	configString := p.String()

@@ -73,7 +73,7 @@ func TestLoadFromFile(t *testing.T) {
 	t.Run("Valid File Path", func(t *testing.T) {
 
 		dir := t.TempDir()
-		filePath := fmt.Sprintf("%s/config.ini", dir)
+		filePath := filepath.Join(dir, "config.ini")
 		err := os.WriteFile(filePath, make([]byte, 0), 0644)
 		if err != nil {
 			t.Errorf("error creating temp file: %q", err)
@@ -240,6 +240,21 @@ func TestSaveToFile(t *testing.T) {
 
 	t.Parallel()
 
+	t.Run("Save to file with wrong extension", func(t *testing.T) {
+		err := p.LoadFromString(iniValidFormat)
+		if err != nil {
+			t.Errorf("error in loading the string, error message: %q", err.Error())
+		}
+
+		tempDir := t.TempDir()
+		filePath := filepath.Join(tempDir, "config.json")
+
+		err = p.SaveToFile(filePath)
+		if err == nil {
+			t.Errorf("wanted %q got nil", ErrInvalidExtension)
+
+		}
+	})
 	t.Run("Save to file with correct path", func(t *testing.T) {
 		err := p.LoadFromString(iniValidFormat)
 		if err != nil {
