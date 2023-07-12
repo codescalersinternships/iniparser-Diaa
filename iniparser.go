@@ -10,12 +10,18 @@ import (
 	"strings"
 )
 
-// The error messages that can be returned by the INI parser.
 var (
-	ErrInvalidFormat    = errors.New("invalid format ")
+	// ErrInvalidFormat is returned when the INI file has an invalid format.
+	ErrInvalidFormat = errors.New("invalid format ")
+
+	// ErrInvalidExtension is returned when the file is not in the INI format or does not have a .ini extension.
 	ErrInvalidExtension = errors.New("file is not in the ini format or does not have a .ini extension")
-	ErrKeyNotExist      = errors.New("key doesn't exist")
-	ErrSectionNotExist  = errors.New("section doesn't exist")
+
+	// ErrKeyNotExist is returned when the given key does not exist in the INI file.
+	ErrKeyNotExist = errors.New("key doesn't exist")
+
+	// ErrSectionNotExist is returned when the given section does not exist in the INI file.
+	ErrSectionNotExist = errors.New("section doesn't exist")
 )
 
 // Section is an alias for a map of string key-value pairs representing a section in INI data.
