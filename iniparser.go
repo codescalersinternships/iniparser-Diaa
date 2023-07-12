@@ -100,7 +100,7 @@ func (p *Parser) LoadFromReader(reader io.Reader) error {
 
 			if len(sectionName) == 0 {
 				p.EmptySections()
-				return fmt.Errorf("%w invalid section at line %d", ErrInvalidFormat, idx)
+				return fmt.Errorf("%w: invalid section at line %d", ErrInvalidFormat, idx)
 			}
 
 			// Start new section
@@ -120,7 +120,7 @@ func (p *Parser) LoadFromReader(reader io.Reader) error {
 
 			if len(key) == 0 {
 				p.EmptySections()
-				return fmt.Errorf("%w invalid key at line %d", ErrInvalidFormat, idx)
+				return fmt.Errorf("%w: invalid key at line %d", ErrInvalidFormat, idx)
 			}
 
 			// Add key-value pair to current section
