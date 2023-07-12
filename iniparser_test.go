@@ -72,13 +72,14 @@ func TestLoadFromFile(t *testing.T) {
 
 	t.Run("Valid File Path", func(t *testing.T) {
 
-		file, err := os.CreateTemp("", "config-*.ini")
+		dir := t.TempDir()
+		filePath := fmt.Sprintf("%s/config.ini", dir)
+		err := os.WriteFile(filePath, make([]byte, 0), 0644)
 		if err != nil {
-			t.Errorf("Error creating temporary file: %q", err)
+			t.Errorf("error creating temp file: %q", err)
 		}
-		defer os.Remove(file.Name())
 
-		err = p.LoadFromFile(file.Name())
+		err = p.LoadFromFile(filePath)
 
 		if err != nil {
 			t.Errorf("expected no error but got %q", err.Error())
@@ -155,7 +156,7 @@ func TestGetSections(t *testing.T) {
 
 		err := p.LoadFromString(iniValidFormat)
 		if err != nil {
-			t.Errorf("error in loading the string, Error message: %q", err.Error())
+			t.Errorf("error in loading the string, error message: %q", err.Error())
 		}
 
 		got := p.GetSections()
@@ -199,7 +200,7 @@ func TestGet(t *testing.T) {
 
 		err := p.LoadFromString(iniValidFormat)
 		if err != nil {
-			t.Errorf("error in loading the string, Error message: %q", err.Error())
+			t.Errorf("error in loading the string, error message: %q", err.Error())
 		}
 
 		_, err = p.Get("Simple Values", "not exist")
@@ -242,7 +243,7 @@ func TestSaveToFile(t *testing.T) {
 	t.Run("Save to file with correct path", func(t *testing.T) {
 		err := p.LoadFromString(iniValidFormat)
 		if err != nil {
-			t.Errorf("error in loading the string, Error message: %q", err.Error())
+			t.Errorf("error in loading the string, error message: %q", err.Error())
 		}
 
 		tempDir := t.TempDir()
@@ -258,7 +259,7 @@ func TestSaveToFile(t *testing.T) {
 	t.Run("Save to file with wrong path", func(t *testing.T) {
 		err := p.LoadFromString(iniValidFormat)
 		if err != nil {
-			t.Errorf("Error in loading the string, Error message: %q", err.Error())
+			t.Errorf("Error in loading the string, error message: %q", err.Error())
 		}
 
 		err = p.SaveToFile("/folder/config.ini")
@@ -277,7 +278,7 @@ func TestString(t *testing.T) {
 		err := p.LoadFromString(iniValidFormat)
 
 		if err != nil {
-			t.Errorf("Error in loading the string, Error message: %q", err.Error())
+			t.Errorf("Error in loading the string, error message: %q", err.Error())
 		}
 		out := p.String()
 
@@ -288,7 +289,7 @@ func TestString(t *testing.T) {
 			sectionNoSpaces := strings.ReplaceAll(section, " ", "")
 
 			if !assertContainsSubString(inputNoSpaces, outNoSpaces, fmt.Sprintf("[%s]", sectionNoSpaces)) {
-				t.Errorf("Expected section [%s] not found in output: %s", sectionNoSpaces, out)
+				t.Errorf("expected section [%s] not found in output: %s", sectionNoSpaces, out)
 			}
 
 			for key, value := range sectionData {
@@ -296,7 +297,7 @@ func TestString(t *testing.T) {
 				valueNoSpaces := strings.ReplaceAll(value, " ", "")
 
 				if !assertContainsSubString(inputNoSpaces, outNoSpaces, fmt.Sprintf("%s=%s", keyNoSpaces, valueNoSpaces)) {
-					t.Errorf("Expected section [%s] not found in output: %s", sectionNoSpaces, out)
+					t.Errorf("expected section [%s] not found in output: %s", sectionNoSpaces, out)
 				}
 
 			}
