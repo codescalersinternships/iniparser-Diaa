@@ -34,6 +34,8 @@ key-value`,
 	=value`,
 	`[Simple]
 	=`,
+	`[]
+	key=value`,
 }
 
 func TestLoadFromString(t *testing.T) {

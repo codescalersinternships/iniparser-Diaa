@@ -17,10 +17,10 @@ var (
 	// ErrInvalidExtension is returned when the file is not in the INI format or does not have a .ini extension.
 	ErrInvalidExtension = errors.New("file is not in the ini format or does not have a .ini extension")
 
-	// ErrKeyNotExist is returned when the given key does not exist in the INI file.
+	// ErrKeyNotExist is returned when the given key does not exist.
 	ErrKeyNotExist = errors.New("key doesn't exist")
 
-	// ErrSectionNotExist is returned when the given section does not exist in the INI file.
+	// ErrSectionNotExist is returned when the given section does not exist.
 	ErrSectionNotExist = errors.New("section doesn't exist")
 )
 
