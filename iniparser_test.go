@@ -1,7 +1,6 @@
 package iniparser
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -9,6 +8,8 @@ import (
 	"sort"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 const iniValidFormat = `
@@ -46,9 +47,8 @@ func TestLoadFromString(t *testing.T) {
 	t.Run("Valid INI Syntax", func(t *testing.T) {
 		err := p.LoadFromString(iniValidFormat)
 
-		if !errors.Is(err, nil) {
-			t.Errorf("got %q want %q with text %q", err, "nil", iniValidFormat)
-		}
+		assert.Nil(t, err, "got %q want nil", err)
+		p.EmptySections()
 	})
 
 	t.Run("Invalid INI Syntax", func(t *testing.T) {
@@ -57,10 +57,22 @@ func TestLoadFromString(t *testing.T) {
 
 			err := p.LoadFromString(text)
 
-			if !errors.Is(err, ErrInvalidFormat) {
-				t.Errorf("got %q want %q with text %q", err, ErrInvalidFormat, text)
-			}
+			assert.NotEqual(t, ErrInvalidFormat, err, "got %q want %q", err, ErrInvalidFormat)
+			p.EmptySections()
 		}
+
+	})
+
+	t.Run("Loading data while sections not empty", func(t *testing.T) {
+
+		err := p.LoadFromString(iniValidFormat)
+
+		assert.Nil(t, err, "got %q want %s", err, "nil")
+
+		// trying to load data again
+		err = p.LoadFromString(iniValidFormat)
+
+		assert.Equal(t, ErrSectionsNotEmpty, err, "got %q want %q", err, ErrInvalidFormat)
 
 	})
 }
@@ -74,16 +86,14 @@ func TestLoadFromFile(t *testing.T) {
 
 		dir := t.TempDir()
 		filePath := filepath.Join(dir, "config.ini")
+
 		err := os.WriteFile(filePath, make([]byte, 0), 0644)
-		if err != nil {
-			t.Errorf("error creating temp file: %q", err)
-		}
+
+		assert.Nil(t, err, "error creating temp file: %q", err)
 
 		err = p.LoadFromFile(filePath)
 
-		if err != nil {
-			t.Errorf("expected no error but got %q", err.Error())
-		}
+		assert.Nil(t, err, "expected no error but got %q", err)
 
 	})
 
@@ -91,9 +101,7 @@ func TestLoadFromFile(t *testing.T) {
 		invalidFile := "configuration.ini"
 		err := p.LoadFromFile(invalidFile)
 
-		if err == nil {
-			t.Errorf("expected error but got no error")
-		}
+		assert.NotNil(t, err, "expected error but got no error")
 	})
 
 	t.Run("Invalid Extension", func(t *testing.T) {
@@ -101,9 +109,7 @@ func TestLoadFromFile(t *testing.T) {
 
 		err := p.LoadFromFile(invalidExtension)
 
-		if !errors.Is(err, ErrInvalidExtension) {
-			t.Errorf("want %q but got %q", ErrInvalidExtension, err)
-		}
+		assert.Equal(t, ErrInvalidExtension, err, "want %q but got %q", ErrInvalidExtension, err)
 	})
 }
 
@@ -115,16 +121,14 @@ func TestGetSectionNames(t *testing.T) {
 	t.Run("Get Sections names from empty map", func(t *testing.T) {
 		gotSections := p.GetSectionNames()
 
-		if len(gotSections) != 0 {
-			t.Errorf("got %q want %q", gotSections, []string{})
-		}
+		assert.Equal(t, 0, len(gotSections), "got %q want %q", gotSections, []string{})
+
+		p.EmptySections()
 	})
 
 	t.Run("Get Sections names", func(t *testing.T) {
 		err := p.LoadFromString(iniValidFormat)
-		if err != nil {
-			t.Errorf("error in loading the string, Error message: %q", err.Error())
-		}
+		assert.Nil(t, err, "error in loading the string, Error message: %q", err)
 
 		gotSections := p.GetSectionNames()
 		wantedSections := []string{"Simple Values", "Complex Values", "new[section]"}
@@ -147,17 +151,13 @@ func TestGetSections(t *testing.T) {
 
 		gotSections := p.GetSections()
 
-		if len(gotSections) != 0 {
-			t.Errorf("got %q want Empty Map", gotSections)
-		}
+		assert.Equal(t, 0, len(gotSections), "got %q want Empty Map", gotSections)
 	})
 
 	t.Run("Get Sections from non Empty Map", func(t *testing.T) {
 
 		err := p.LoadFromString(iniValidFormat)
-		if err != nil {
-			t.Errorf("error in loading the string, error message: %q", err.Error())
-		}
+		assert.Nil(t, err, "error in loading the string, error message: %q", err)
 
 		got := p.GetSections()
 
@@ -191,48 +191,37 @@ func TestGet(t *testing.T) {
 
 		_, err := p.Get("Not Exist", "key")
 
-		if err != ErrSectionNotExist {
-			t.Errorf("want %q but got %q", ErrKeyNotExist, err)
-		}
+		assert.Equal(t, ErrSectionNotExist, err, "want %q but got %q", ErrKeyNotExist, err)
 	})
 
 	t.Run("Get value from Key not exist", func(t *testing.T) {
 
 		err := p.LoadFromString(iniValidFormat)
-		if err != nil {
-			t.Errorf("error in loading the string, error message: %q", err.Error())
-		}
+		assert.Nil(t, err, "error in loading the string, error message: %q", err)
 
 		_, err = p.Get("Simple Values", "not exist")
 
-		if !errors.Is(ErrKeyNotExist, err) {
-			t.Errorf("want %q but got %q", ErrKeyNotExist, err)
-		}
+		assert.Equal(t, ErrKeyNotExist, err, "want %q but got %q", ErrKeyNotExist, err)
 	})
 
 	t.Run("Get existing value", func(t *testing.T) {
 		got, _ := p.Get("Simple Values", "key")
 		want := "value"
 
-		assertStrings(t, got, want)
+		assert.Equal(t, want, got, "got %q want %q", got, want)
 	})
 }
 
 func TestSet(t *testing.T) {
 	p := NewParser()
 
+	t.Parallel()
 	t.Run("Set value to map", func(t *testing.T) {
 		p.Set("Simple Values", "key", "new value")
 		got, _ := p.Get("Simple Values", "key")
 		want := "new value"
-		assertStrings(t, got, want)
+		assert.Equal(t, want, got, "got %q want %q", got, want)
 	})
-}
-
-func assertStrings(t testing.TB, got, want string) {
-	if got != want {
-		t.Errorf("got %q want %q", got, want)
-	}
 }
 
 func TestSaveToFile(t *testing.T) {
@@ -242,45 +231,28 @@ func TestSaveToFile(t *testing.T) {
 
 	t.Run("Save to file with wrong extension", func(t *testing.T) {
 		err := p.LoadFromString(iniValidFormat)
-		if err != nil {
-			t.Errorf("error in loading the string, error message: %q", err.Error())
-		}
+		assert.Nil(t, err, "error in loading the string, error message: %q", err)
 
 		tempDir := t.TempDir()
 		filePath := filepath.Join(tempDir, "config.json")
 
 		err = p.SaveToFile(filePath)
-		if err == nil {
-			t.Errorf("wanted %q got nil", ErrInvalidExtension)
-
-		}
+		assert.NotNil(t, err, "wanted %q got nil", ErrInvalidExtension)
 	})
-	t.Run("Save to file with correct path", func(t *testing.T) {
-		err := p.LoadFromString(iniValidFormat)
-		if err != nil {
-			t.Errorf("error in loading the string, error message: %q", err.Error())
-		}
+	t.Run("Save to file with correct path and ext", func(t *testing.T) {
 
 		tempDir := t.TempDir()
 
 		filePath := filepath.Join(tempDir, "config.ini")
 
-		err = p.SaveToFile(filePath)
-		if err != nil {
-			t.Errorf("wanted nil got %q", err.Error())
-		}
+		err := p.SaveToFile(filePath)
+		assert.Nil(t, err, "wanted nil got %q", err)
 	})
 
 	t.Run("Save to file with wrong path", func(t *testing.T) {
-		err := p.LoadFromString(iniValidFormat)
-		if err != nil {
-			t.Errorf("Error in loading the string, error message: %q", err.Error())
-		}
 
-		err = p.SaveToFile("/folder/config.ini")
-		if err == nil {
-			t.Errorf("wanted error on saving but got nil")
-		}
+		err := p.SaveToFile("/folder/config.ini")
+		assert.NotNil(t, err, "wanted error on saving but got nil")
 	})
 }
 
@@ -292,9 +264,7 @@ func TestString(t *testing.T) {
 	t.Run("Testing String Function", func(t *testing.T) {
 		err := p.LoadFromString(iniValidFormat)
 
-		if err != nil {
-			t.Errorf("Error in loading the string, error message: %q", err.Error())
-		}
+		assert.Nil(t, err, "Error in loading the string, error message: %q", err)
 		out := p.String()
 
 		inputNoSpaces := strings.ReplaceAll(iniValidFormat, " ", "")

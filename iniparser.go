@@ -22,6 +22,9 @@ var (
 
 	// ErrSectionNotExist is returned when the given section does not exist.
 	ErrSectionNotExist = errors.New("section doesn't exist")
+
+	//ErrSectionsNotEmpty is returned if a load operation is attempted while the sections is not empty
+	ErrSectionsNotEmpty = errors.New("sections is not empty")
 )
 
 // Section is an alias for a map of string key-value pairs representing a section in INI data.
@@ -64,8 +67,16 @@ func (p *Parser) LoadFromFile(path string) error {
 	return p.LoadFromReader(bufio.NewReader(file))
 }
 
+func (p *Parser) IsEmpty() bool {
+	return len(p.sections) == 0
+}
+
 // LoadFromReader loads INI data from an io.Reader object.
 func (p *Parser) LoadFromReader(reader io.Reader) error {
+	if !p.IsEmpty() {
+		return ErrSectionsNotEmpty
+	}
+
 	var currentSection string = ""
 	scanner := bufio.NewScanner(reader)
 	idx := 0
@@ -88,6 +99,7 @@ func (p *Parser) LoadFromReader(reader io.Reader) error {
 			sectionName = strings.TrimSpace(sectionName)
 
 			if len(sectionName) == 0 {
+				p.EmptySections()
 				return fmt.Errorf("%w invalid section at line %d", ErrInvalidFormat, idx)
 			}
 
@@ -107,16 +119,22 @@ func (p *Parser) LoadFromReader(reader io.Reader) error {
 			key, value = strings.TrimSpace(key), strings.TrimSpace(value)
 
 			if len(key) == 0 {
+				p.EmptySections()
 				return fmt.Errorf("%w invalid key at line %d", ErrInvalidFormat, idx)
 			}
 
 			// Add key-value pair to current section
 			p.sections[currentSection][key] = value
 		} else {
+			p.EmptySections()
 			return fmt.Errorf("%w invalid format at line %d", ErrInvalidFormat, idx)
 		}
 	}
 	return scanner.Err()
+}
+
+func (p *Parser) EmptySections() {
+	p.sections = make(IniData)
 }
 
 // GetSectionNames returns the names of all sections in the INI data.
