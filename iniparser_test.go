@@ -2,15 +2,14 @@ package iniparser
 
 import (
 	"errors"
+	"fmt"
 	"os"
+	"path/filepath"
 	"reflect"
 	"sort"
 	"strings"
 	"testing"
-	"path/filepath"
-	"fmt"
 )
-
 
 const iniValidFormat = `
 [Simple Values]
@@ -173,13 +172,12 @@ func TestGetSections(t *testing.T) {
 			},
 		}
 
-		if !reflect.DeepEqual(got,wanted){
+		if !reflect.DeepEqual(got, wanted) {
 			t.Errorf("actual map %v does not match expected map %v", got, wanted)
 
 		}
 	})
 }
-
 
 func TestGet(t *testing.T) {
 	p := NewParser()
@@ -245,9 +243,9 @@ func TestSaveToFile(t *testing.T) {
 			t.Errorf("error in loading the string, Error message: %q", err.Error())
 		}
 
-		tempDir :=t.TempDir()
+		tempDir := t.TempDir()
 
-		filePath := filepath.Join(tempDir,"config.ini")
+		filePath := filepath.Join(tempDir, "config.ini")
 
 		err = p.SaveToFile(filePath)
 		if err != nil {
@@ -287,7 +285,7 @@ func TestString(t *testing.T) {
 		for section, sectionData := range p.GetSections() {
 			sectionNoSpaces := strings.ReplaceAll(section, " ", "")
 
-			if !assertContainsSubString(inputNoSpaces, outNoSpaces, fmt.Sprintf("[%s]",sectionNoSpaces)) {
+			if !assertContainsSubString(inputNoSpaces, outNoSpaces, fmt.Sprintf("[%s]", sectionNoSpaces)) {
 				t.Errorf("Expected section [%s] not found in output: %s", sectionNoSpaces, out)
 			}
 
@@ -295,7 +293,7 @@ func TestString(t *testing.T) {
 				keyNoSpaces := strings.ReplaceAll(key, " ", "")
 				valueNoSpaces := strings.ReplaceAll(value, " ", "")
 
-				if !assertContainsSubString(inputNoSpaces, outNoSpaces, fmt.Sprintf("%s=%s",keyNoSpaces,valueNoSpaces)) {
+				if !assertContainsSubString(inputNoSpaces, outNoSpaces, fmt.Sprintf("%s=%s", keyNoSpaces, valueNoSpaces)) {
 					t.Errorf("Expected section [%s] not found in output: %s", sectionNoSpaces, out)
 				}
 
@@ -312,4 +310,5 @@ func assertContainsSubString(input, out, target string) bool {
 		return false
 	}
 	return true
+
 }
