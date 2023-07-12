@@ -276,11 +276,3 @@ func TestString(t *testing.T) {
 	})
 }
 
-// func assertContainsSubString(input, out, target string) bool {
-
-// 	if !strings.Contains(input, target) || !strings.Contains(out, target) {
-// 		return false
-// 	}
-// 	return true
-
-// }
