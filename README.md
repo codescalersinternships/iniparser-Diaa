@@ -7,6 +7,8 @@ This package provides a parser for INI files in Go.
 To parse INI data, create a new Parser object using the NewParser() function:
 
 ```go
+import "github.com/codescalersinternships/iniparser-Diaa"
+
 parser := iniparser.NewParser()
 ```
 
@@ -106,19 +108,3 @@ To run the automated tests for this project, follow these steps:
 1. Install the necessary dependencies by running `go get -d ./...`.
 2. Run the tests by running `go test ./...`.
 3. If all tests pass, the output should indicate that the tests have passed. If any tests fail, the output will provide information on which tests failed.
-
-## How to import
-
-1- Declare the dependency of iniparser-Diaa in your project's `go.mod` file
-
-> - This can be done by running
->
-> ```go
-> go get github.com/codescalersinternships/iniparser-Diaa
-> ```
-
-2- Import the package in your go code
-
-> ```go
-> import "github.com/codescalersinternships/iniparser-Diaa"
-> ```

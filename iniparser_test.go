@@ -48,7 +48,7 @@ func TestLoadFromString(t *testing.T) {
 		err := p.LoadFromString(iniValidFormat)
 
 		assert.Nil(t, err, "got %q want nil", err)
-		p.EmptySections()
+
 	})
 
 	t.Run("Invalid INI Syntax", func(t *testing.T) {
@@ -58,21 +58,7 @@ func TestLoadFromString(t *testing.T) {
 			err := p.LoadFromString(text)
 
 			assert.NotEqual(t, ErrInvalidFormat, err, "got %q want %q", err, ErrInvalidFormat)
-			p.EmptySections()
 		}
-
-	})
-
-	t.Run("Loading data while sections not empty", func(t *testing.T) {
-
-		err := p.LoadFromString(iniValidFormat)
-
-		assert.Nil(t, err, "got %q want %s", err, "nil")
-
-		// trying to load data again
-		err = p.LoadFromString(iniValidFormat)
-
-		assert.Equal(t, ErrSectionsNotEmpty, err, "got %q want %q", err, ErrInvalidFormat)
 
 	})
 }
@@ -123,7 +109,6 @@ func TestGetSectionNames(t *testing.T) {
 
 		assert.Equal(t, 0, len(gotSections), "got %q want %q", gotSections, []string{})
 
-		p.EmptySections()
 	})
 
 	t.Run("Get Sections names", func(t *testing.T) {
@@ -273,17 +258,16 @@ func TestString(t *testing.T) {
 		for section, sectionData := range p.GetSections() {
 			sectionNoSpaces := strings.ReplaceAll(section, " ", "")
 
-			if !assertContainsSubString(inputNoSpaces, outNoSpaces, fmt.Sprintf("[%s]", sectionNoSpaces)) {
-				t.Errorf("expected section [%s] not found in output: %s", sectionNoSpaces, out)
-			}
+			assert.Contains(t, inputNoSpaces, fmt.Sprintf("[%s]", sectionNoSpaces), "expected section [%s] not found in output: %s", sectionNoSpaces, out)
+			assert.Contains(t, outNoSpaces, fmt.Sprintf("[%s]", sectionNoSpaces), "expected section [%s] not found in output: %s", sectionNoSpaces, out)
 
 			for key, value := range sectionData {
 				keyNoSpaces := strings.ReplaceAll(key, " ", "")
 				valueNoSpaces := strings.ReplaceAll(value, " ", "")
 
-				if !assertContainsSubString(inputNoSpaces, outNoSpaces, fmt.Sprintf("%s=%s", keyNoSpaces, valueNoSpaces)) {
-					t.Errorf("expected section [%s] not found in output: %s", sectionNoSpaces, out)
-				}
+				assert.Contains(t, inputNoSpaces, fmt.Sprintf("%s=%s", keyNoSpaces, valueNoSpaces), "expected section [%s] not found in output: %s", sectionNoSpaces, out)
+
+				assert.Contains(t, outNoSpaces, fmt.Sprintf("%s=%s", keyNoSpaces, valueNoSpaces), "expected section [%s] not found in output: %s", sectionNoSpaces, out)
 
 			}
 
@@ -292,11 +276,11 @@ func TestString(t *testing.T) {
 	})
 }
 
-func assertContainsSubString(input, out, target string) bool {
+// func assertContainsSubString(input, out, target string) bool {
 
-	if !strings.Contains(input, target) || !strings.Contains(out, target) {
-		return false
-	}
-	return true
+// 	if !strings.Contains(input, target) || !strings.Contains(out, target) {
+// 		return false
+// 	}
+// 	return true
 
-}
+// }
