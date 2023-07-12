@@ -76,7 +76,7 @@ func (p *Parser) LoadFromReader(reader io.Reader) error {
 		line = strings.TrimSpace(line)
 
 		// Skip empty lines and comments
-		if len(line) == 0 || string(line[0]) == ";" {
+		if len(line) == 0 || line[0] == ';' || line[0] == '#' {
 			continue
 		}
 
