@@ -33,4 +33,10 @@ jobs:
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
-          version: v1.42.0
+          version: v1.53
+
+      - name: Run gofmt
+        uses: Jerome1337/gofmt-action@v1.0.5
+        with:
+          gofmt-path: ./
+          gofmt-flags: -l -d -e
